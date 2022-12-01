@@ -577,7 +577,7 @@ def Print_Extracted_PDE(
         Extracted_PDE           : np.array,
         Time_Derivative_Order   : int,
         num_multi_indices       : np.array,
-        multi_indices_list      : Tuple) -> None:
+        multi_indices_list      : Tuple):
     """ This function takes in the output of Thresholded_Least_Squares and
     prints it as a human-readable PDE.
 
@@ -600,15 +600,19 @@ def Print_Extracted_PDE(
     Returns:
 
     Nothing! """
-
+    # str_expression will hold the PDE as a string.
+    str_expression = "";
     # Start the printout.
     if(Time_Derivative_Order == 1):
         print("D_t U = ", end = '');
+        str_expression += "D_t U = ";
     else:
         print("D_t^%u U = " % Time_Derivative_Order, end = '')
+        str_expression += "D_t^%u U = " % Time_Derivative_Order;
 
     if (Extracted_PDE[0] != 0):
         print("%f " % Extracted_PDE[0], end = '');
+        str_expression += "%f " % Extracted_PDE[0];
 
     position : int    = 1;
     for k in range(1, num_multi_indices.shape[0]):
@@ -619,17 +623,22 @@ def Print_Extracted_PDE(
             # corresponding term.
             if(Extracted_PDE[position] != 0):
                 print(" + %f" % Extracted_PDE[position], end = '');
+                str_expression += " + %f" % Extracted_PDE[position];
                 multi_index = multi_indices_list[k][i];
 
                 # cycle through the sub-indices of this multi-index.
                 for j in range(k):
                     if(multi_index[j] == 0):
                         print("(U)", end = '');
+                        str_expression += "(U)";
                     elif(multi_index[j] == 1):
                         print("(D_x U)", end = '');
+                        str_expression += "(D_x U)";
                     else:
                         print("(D_x^%u U)" % (multi_index[j]), end = '');
+                        str_expression += "(D_x^%u U)" % (multi_index[j]);
             position += 1;
 
     # Finish printing (this prints a newline character).
     print();
+    return str_expression

@@ -8,7 +8,7 @@ from Settings_Reader import Settings_Reader, Settings_Container;
 from Data_Setup      import Data_Loader, Data_Container;
 from Points          import Generate_Points;
 from Timing          import Timer;
-from utils           import create_record_history_logfile;
+from utils           import create_record_history_logfile, create_record_pde_extraxted;
 
 
 
@@ -84,8 +84,7 @@ def main():
         Load_File_Path : str = "../Saves/" + Settings.Load_File_Name;
         Saved_State = torch.load(Load_File_Path, map_location = Settings.Device);
 
-        # Load logfile
-        log_file_path : str = "../Saves/" + Settings.Load_File_Name + "_logs.csv"
+    
 
         if(Settings.Load_Sol_Network_State == True):
             Sol_NN.load_state_dict(Saved_State["Sol_Network_State"]);
@@ -125,6 +124,8 @@ def main():
     Main_Timer.Start();
 
     if  (Settings.Mode == "Discovery"):
+        # Load logfile
+        log_file_path : str = "../Saves/" + Settings.DataSet_Name + "_logs.csv"
         # Setup Loss tracking.
         if(Epochs != 0):
             # Set up arrays for the different losses. We only measure the loss every
@@ -201,9 +202,9 @@ def main():
                 print("            | Train:\t Collocation = %.7f\t Data = %.7f\t Total = %.7f"
                     % (Train_Coll_Loss[i], Train_Data_Loss[i], Train_Coll_Loss[i] + Train_Data_Loss[i]));
                 create_record_history_logfile(log_file_path,
-                 [t,'test',Test_Coll_Loss[i], Test_Data_Loss[i], Test_Coll_Loss[i] + Test_Data_Loss[i]])
+                 [t, Settings.Optimizer,'test',Test_Coll_Loss[i], Test_Data_Loss[i], Test_Coll_Loss[i] + Test_Data_Loss[i]])
                 create_record_history_logfile(log_file_path,
-                 [t,'train',Train_Coll_Loss[i], Train_Data_Loss[i], Train_Coll_Loss[i] + Train_Data_Loss[i]])    
+                 [t, Settings.Optimizer, 'train',Train_Coll_Loss[i], Train_Data_Loss[i], Train_Coll_Loss[i] + Train_Data_Loss[i]])    
                 # Increment the counter.
                 Loss_Counter += 1;
             else:
@@ -244,15 +245,17 @@ def main():
 
         # Pint the 5 most likely PDEs.
         Num_Cols : int = Library.shape[1];
+        extracted_pde_file_path : str = "../Saves/" + Settings.DataSet_Name + "_pde_extracted.csv"
         for i in range(Num_Cols - 5, Num_Cols):
             print(("The #%u most likely PDE gives a residual of %.4lf (%.2lf%% better than the next sparsest PDE)." % (Num_Cols - i, Residual_Ranked[i], Residual_Change[i]*100)));
-            Print_Extracted_PDE(
-                Extracted_PDE           = X_Ranked[:, i],
-                Time_Derivative_Order   = Settings.PDE_Time_Derivative_Order,
-                num_multi_indices       = num_multi_indices,
-                multi_indices_list      = multi_indices_list);
-
-
+            extracted_pde_str = Print_Extracted_PDE(
+                                                    Extracted_PDE           = X_Ranked[:, i],
+                                                    Time_Derivative_Order   = Settings.PDE_Time_Derivative_Order,
+                                                    num_multi_indices       = num_multi_indices,
+                                                    multi_indices_list      = multi_indices_list);
+            create_record_pde_extraxted(extracted_pde_file_path,
+                 [i, Num_Cols - i, Residual_Ranked[i], Residual_Change[i]*100,extracted_pde_str])        
+ 
     else:
         print(("Mode is %s. It should be one of \"Discovery\", \"Extraction\"." % Settings.Mode));
         print("Something went wrong. Aborting. Thrown by main.");
