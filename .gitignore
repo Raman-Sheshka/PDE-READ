@@ -1,3 +1,4 @@
 /Saves/*
 /Figures/*
 /Data/DataSets/*.npz
+/morphogenesis/wt/*

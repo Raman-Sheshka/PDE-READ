@@ -1,4 +1,5 @@
 import numpy;
+import os;
 
 
 
@@ -39,8 +40,12 @@ def Create_Data_Set(        Name            : str,
 
     Nothing! """
 
-    # Fist, open the file.
-    Path : str = "./DataSets/" + Name + ".npz";
+    if os.path.exists("./DataSets/"):
+        # Fist, open the file.
+        Path : str = "./DataSets/" + Name + ".npz";
+    else:
+        # Fist, open the file.
+        Path : str = "../Data/DataSets/" + Name + ".npz";     
     File = open(Path, mode = "wb");
 
     # Now, serialize the Inputs and Targets arrays
