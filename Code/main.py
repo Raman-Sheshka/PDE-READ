@@ -8,6 +8,7 @@ from Settings_Reader import Settings_Reader, Settings_Container;
 from Data_Setup      import Data_Loader, Data_Container;
 from Points          import Generate_Points;
 from Timing          import Timer;
+from utils           import create_record_history_logfile;
 
 
 
@@ -82,6 +83,9 @@ def main():
         # Load the saved checkpoint. Make sure to map it to the correct device.
         Load_File_Path : str = "../Saves/" + Settings.Load_File_Name;
         Saved_State = torch.load(Load_File_Path, map_location = Settings.Device);
+
+        # Load logfile
+        log_file_path : str = "../Saves/" + Settings.Load_File_Name + "_logs.csv"
 
         if(Settings.Load_Sol_Network_State == True):
             Sol_NN.load_state_dict(Saved_State["Sol_Network_State"]);
@@ -190,13 +194,16 @@ def main():
                     Data_Values                 = Data_Container.Train_Targets,
                     Data_Type                   = torch.float32,
                     Device                      = Settings.Device);
-
+               
                 # Print losses!
                 print("Epoch #%-4d | Test: \t Collocation = %.7f\t Data = %.7f\t Total = %.7f"
                     % (t, Test_Coll_Loss[i], Test_Data_Loss[i], Test_Coll_Loss[i] + Test_Data_Loss[i]));
                 print("            | Train:\t Collocation = %.7f\t Data = %.7f\t Total = %.7f"
                     % (Train_Coll_Loss[i], Train_Data_Loss[i], Train_Coll_Loss[i] + Train_Data_Loss[i]));
-
+                create_record_history_logfile(log_file_path,
+                 [t,'test',Test_Coll_Loss[i], Test_Data_Loss[i], Test_Coll_Loss[i] + Test_Data_Loss[i]])
+                create_record_history_logfile(log_file_path,
+                 [t,'train',Train_Coll_Loss[i], Train_Data_Loss[i], Train_Coll_Loss[i] + Train_Data_Loss[i]])    
                 # Increment the counter.
                 Loss_Counter += 1;
             else:
