@@ -1,0 +1,5 @@
+epoch,optimizer,experiment,collocation,data,total
+0,Adam,test,0.43082806,1.7997359,2.2305639
+0,Adam,train,0.43101305,1.7847931,2.2158062
+10,Adam,test,0.010243724,0.556463,0.5667067
+10,Adam,train,0.010322168,0.549952,0.5602741

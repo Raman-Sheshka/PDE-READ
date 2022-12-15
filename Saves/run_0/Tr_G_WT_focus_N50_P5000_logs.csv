@@ -1,0 +1,3 @@
+epoch,optimizer,experiment,collocation,data,total
+0,LBFGS,test,9.985273e-05,0.00022891516,0.0003287679
+0,LBFGS,train,0.00010060601,0.00023541848,0.0003360245
