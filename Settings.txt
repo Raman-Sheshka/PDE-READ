@@ -30,7 +30,7 @@ Load Optimizer State [bool] :                    True
 
 Save State [Bool] :                              True
   Save File Name [str] :                         Tr_G_WT_rescaled_N50_P5000_Adam
-
+  Save Folder Name [str] :                       run_5  
 
 
 ################################################################################
