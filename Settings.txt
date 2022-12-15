@@ -23,13 +23,13 @@
 # The code will NOT load the Optimizer if in Extraction mode. In this case, the
 # Reader ignores the load optimizer setting.
 
-Load Sol Network State [bool] :                  False
-Load PDE Network State [bool] :                  False
-Load Optimizer State [bool] :                    False
-  Load File Name [str] :                         Burgers_Sine_N50_P5000_Rat_Adam
+Load Sol Network State [bool] :                  True
+Load PDE Network State [bool] :                  True
+Load Optimizer State [bool] :                    True
+  Load File Name [str] :                         Tr_G_WT_rescaled_N50_P5000_Adam
 
 Save State [Bool] :                              True
-  Save File Name [str] :                         Burgers_Sine_N50_P5000_Rat_Adam
+  Save File Name [str] :                         Tr_G_WT_rescaled_N50_P5000_Adam
 
 
 
@@ -53,20 +53,20 @@ Save State [Bool] :                              True
 # has degree 2, u^2 (du_dx)^3 d^2u_dx^2 has order 6, etc.). The latter controls
 # the number of points (in the PDE domain) at which we attempt to fit the PDE.
 
-Discovery, or Extraction mode [str] :            Discovery
+Discovery, or Extraction mode [str] :            Extraction
 
 # Which dataset do we want to use?
-DataSet Name [str] :                             Burgers_Sine_N50_P5000
+DataSet Name [str] :                             Tr_G_WT_rescaled_N50_P5000
 
 # Discovery mode specific settings.
-Number of Training Collocation Points [int] :    5000
-Number of Testing Collocation Points [int] :     1000
+Number of Training Collocation Points [int] :    40000
+Number of Testing Collocation Points [int] :     20000
 
 # Extraction mode specific settings.
 Extracted PDE maximum term degree [int] :        3
-Number of Extraction Points [int] :              20000
+Number of Extraction Points [int] :              30000
 
-Train on CPU or GPU [GPU, CPU] :                 CPU
+Train on CPU or GPU [GPU, CPU] :                 GPU
 
 
 
@@ -77,7 +77,7 @@ Train on CPU or GPU [GPU, CPU] :                 CPU
 #         D_t^m U = N(U, D_x U, D_x^2 U, ... , D_x^n U)
 # Here, m = Time Derivative Order, and n = Spatial Derivative Order.
 
-PDE - Time Derivative Order [int] :              1
+PDE - Time Derivative Order [int] :              2
 PDE - Spatial Derivative Order [int] :           2
 
 
@@ -102,14 +102,14 @@ PDE Network - Number of Hidden Layers [int] :    2
 PDE Network - Neurons per Hidden Layer [int] :   100
 PDE Network - Activation Function [str] :        Rat
 
-Optimizer [Adam, LBFGS, SGD] :                   Adam
+Optimizer [Adam, LBFGS, SGD] :                   LBFGS
 
 
 
 ################################################################################
 # Learning hyper-parameters
 
-Number of Epochs [int] :                         1000
-Learning Rate [float] :                          .001
+Number of Epochs [int] :                         100
+Learning Rate [float] :                          .01
 
 Epochs between testing [int] :                   10

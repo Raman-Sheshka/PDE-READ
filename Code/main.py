@@ -1,5 +1,6 @@
 import numpy;
 import torch;
+torch.cuda.empty_cache()
 
 from Network         import Neural_Network;
 from Test_Train      import Discovery_Testing, Discovery_Training;
