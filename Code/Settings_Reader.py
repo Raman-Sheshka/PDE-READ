@@ -264,6 +264,7 @@ def Settings_Reader() -> Settings_Container:
     # If we want to save anything, get save file name.
     if(Settings.Save_To_File == True):
         Settings.Save_File_Name     = Read_Setting(File, "Save File Name [str] :");
+        Settings.Save_Folder_Name   = Read_Setting(File, "Save Folder Name [str] :");
 
 
 
