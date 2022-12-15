@@ -82,7 +82,7 @@ def main():
         Settings.Load_Optimizer_State   == True):
 
         # Load the saved checkpoint. Make sure to map it to the correct device.
-        Load_File_Path : str = "../Saves/" + Settings.Load_File_Name;
+        Load_File_Path : str = "../Saves/" + Settings.Load_Folder_Name + "/"+ Settings.Load_File_Name;
         Saved_State = torch.load(Load_File_Path, map_location = Settings.Device);
 
     
@@ -126,7 +126,7 @@ def main():
 
     if  (Settings.Mode == "Discovery"):
         # Load logfile
-        log_file_path : str = "../Saves/" + Settings.DataSet_Name + "_logs.csv"
+        log_file_path : str = "../Saves/" + Settings.Save_Folder_Name + "/" + Settings.DataSet_Name + "_logs.csv"
         # Setup Loss tracking.
         if(Epochs != 0):
             # Set up arrays for the different losses. We only measure the loss every
@@ -246,7 +246,7 @@ def main():
 
         # Pint the 5 most likely PDEs.
         Num_Cols : int = Library.shape[1];
-        extracted_pde_file_path : str = "../Saves/" + Settings.DataSet_Name + "_pde_extracted.csv"
+        extracted_pde_file_path : str = "../Saves/"+ Settings.Save_Folder_Name + "/"+ Settings.DataSet_Name + "_pde_extracted.csv"
         for i in range(Num_Cols - 5, Num_Cols):
             print(("The #%u most likely PDE gives a residual of %.4lf (%.2lf%% better than the next sparsest PDE)." % (Num_Cols - i, Residual_Ranked[i], Residual_Change[i]*100)));
             extracted_pde_str = Print_Extracted_PDE(
@@ -287,7 +287,7 @@ def main():
     # trains something.
 
     if(Settings.Mode == "Discovery" and Settings.Save_To_File == True):
-        Save_File_Path : str = "../Saves/" + Settings.Save_File_Name;
+        Save_File_Path : str = "../Saves/" + Settings.Save_Folder_Name + "/" + Settings.Save_File_Name;
         torch.save({"Sol_Network_State" : Sol_NN.state_dict(),
                     "PDE_Network_State" : PDE_NN.state_dict(),
                     "Optimizer_State"   : Optimizer.state_dict()},

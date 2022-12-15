@@ -1,5 +1,6 @@
 import os
 import csv
+import numpy as np
 
 def create_record_history_logfile(file_path, data_to_write)->None:
     header_row = ['epoch',
@@ -46,4 +47,4 @@ def create_record_pde_extraxted(file_path, data_to_write)->None:
             # write a data row to the csv file
             writer.writerow(data_to_write)
             # close
-            f.close()
+            f.close()   
