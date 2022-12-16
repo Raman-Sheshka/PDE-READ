@@ -1,6 +1,6 @@
 import numpy;
 import torch;
-torch.cuda.empty_cache()
+import os;
 
 from Network         import Neural_Network;
 from Test_Train      import Discovery_Testing, Discovery_Training;
@@ -9,15 +9,16 @@ from Settings_Reader import Settings_Reader, Settings_Container;
 from Data_Setup      import Data_Loader, Data_Container;
 from Points          import Generate_Points;
 from Timing          import Timer;
-from utils           import create_record_history_logfile, create_record_pde_extraxted;
-
+from utils           import create_record_history_logfile, create_record_pde_extraxted, copy_and_rename, create_folder_if_not_exists;
 
 
 def main():
+    dir_path = os.path.dirname(os.path.realpath(__file__))
     ############################################################################
     # Load settings, print them.
 
     Settings = Settings_Reader();
+    create_folder_if_not_exists("../Saves/" + Settings.Save_Folder_Name)
     print("Loaded the following settings:");
     for (setting, value) in Settings.__dict__.items():
         print(("%-30s = " % setting) + str(value));
@@ -82,10 +83,8 @@ def main():
         Settings.Load_Optimizer_State   == True):
 
         # Load the saved checkpoint. Make sure to map it to the correct device.
-        Load_File_Path : str = "../Saves/" + Settings.Load_Folder_Name + "/"+ Settings.Load_File_Name;
+        Load_File_Path : str = "../Saves/" + Settings.Load_File_Name;
         Saved_State = torch.load(Load_File_Path, map_location = Settings.Device);
-
-    
 
         if(Settings.Load_Sol_Network_State == True):
             Sol_NN.load_state_dict(Saved_State["Sol_Network_State"]);
@@ -196,16 +195,17 @@ def main():
                     Data_Values                 = Data_Container.Train_Targets,
                     Data_Type                   = torch.float32,
                     Device                      = Settings.Device);
-               
+
                 # Print losses!
                 print("Epoch #%-4d | Test: \t Collocation = %.7f\t Data = %.7f\t Total = %.7f"
                     % (t, Test_Coll_Loss[i], Test_Data_Loss[i], Test_Coll_Loss[i] + Test_Data_Loss[i]));
                 print("            | Train:\t Collocation = %.7f\t Data = %.7f\t Total = %.7f"
                     % (Train_Coll_Loss[i], Train_Data_Loss[i], Train_Coll_Loss[i] + Train_Data_Loss[i]));
                 create_record_history_logfile(log_file_path,
-                 [t, Settings.Optimizer,'test',Test_Coll_Loss[i], Test_Data_Loss[i], Test_Coll_Loss[i] + Test_Data_Loss[i]])
+                 [t, Settings.Optimizer,'test',Test_Coll_Loss[i], Test_Data_Loss[i], Test_Coll_Loss[i] + Test_Data_Loss[i]]);
                 create_record_history_logfile(log_file_path,
-                 [t, Settings.Optimizer, 'train',Train_Coll_Loss[i], Train_Data_Loss[i], Train_Coll_Loss[i] + Train_Data_Loss[i]])    
+                 [t, Settings.Optimizer, 'train',Train_Coll_Loss[i], Train_Data_Loss[i], Train_Coll_Loss[i] + Train_Data_Loss[i]]);    
+
                 # Increment the counter.
                 Loss_Counter += 1;
             else:
@@ -246,7 +246,7 @@ def main():
 
         # Pint the 5 most likely PDEs.
         Num_Cols : int = Library.shape[1];
-        extracted_pde_file_path : str = "../Saves/"+ Settings.Save_Folder_Name + "/"+ Settings.DataSet_Name + "_pde_extracted.csv"
+        extracted_pde_file_path : str = "../Saves/"+ Settings.Save_Folder_Name + "/"+ Settings.DataSet_Name + "_Extracted_Term_Degree_" + str(Settings.Extracted_Term_Degree) + "_pde_extracted.csv"
         for i in range(Num_Cols - 5, Num_Cols):
             print(("The #%u most likely PDE gives a residual of %.4lf (%.2lf%% better than the next sparsest PDE)." % (Num_Cols - i, Residual_Ranked[i], Residual_Change[i]*100)));
             extracted_pde_str = Print_Extracted_PDE(
@@ -255,8 +255,8 @@ def main():
                                                     num_multi_indices       = num_multi_indices,
                                                     multi_indices_list      = multi_indices_list);
             create_record_pde_extraxted(extracted_pde_file_path,
-                 [i, Num_Cols - i, Residual_Ranked[i], Residual_Change[i]*100,extracted_pde_str])        
- 
+                 [i, Num_Cols - i, Residual_Ranked[i], Residual_Change[i]*100,extracted_pde_str])
+
     else:
         print(("Mode is %s. It should be one of \"Discovery\", \"Extraction\"." % Settings.Mode));
         print("Something went wrong. Aborting. Thrown by main.");
@@ -287,11 +287,19 @@ def main():
     # trains something.
 
     if(Settings.Mode == "Discovery" and Settings.Save_To_File == True):
-        Save_File_Path : str = "../Saves/" + Settings.Save_Folder_Name + "/" + Settings.Save_File_Name;
+        Save_File_Path : str = "../Saves/" + Settings.Save_File_Name;
         torch.save({"Sol_Network_State" : Sol_NN.state_dict(),
                     "PDE_Network_State" : PDE_NN.state_dict(),
                     "Optimizer_State"   : Optimizer.state_dict()},
                     Save_File_Path);
+       
+        if os.path.isfile('../Settings.txt'):
+            filename: str = 'Settings.txt';
+            copy_and_rename('../Settings.txt',
+                            "../Saves/" + Settings.Save_Folder_Name + "/" + filename);
+        if os.path.isfile(Save_File_Path):
+            copy_and_rename(Save_File_Path,
+                            "../Saves/" + Settings.Save_Folder_Name + "/" + Settings.Save_File_Name);                                
 
 
 if __name__ == '__main__':
