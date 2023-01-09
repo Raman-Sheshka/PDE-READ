@@ -23,15 +23,15 @@
 # The code will NOT load the Optimizer if in Extraction mode. In this case, the
 # Reader ignores the load optimizer setting.
 
-Load Sol Network State [bool] :                  True
-Load PDE Network State [bool] :                  True
-Load Optimizer State [bool] :                    True
-  Load File Name [str] :                         Tr_G_WT_focused_N50_P5000_Adam
-  Load Folder Name [str] :                       run_01
+Load Sol Network State [bool] :                  False
+Load PDE Network State [bool] :                  False
+Load Optimizer State [bool] :                    False
+  Load File Name [str] :                         Tr_G_WT_normalized_focused_N50_P5000_Adam
+  Load Folder Name [str] :                       run_02
 
 Save State [Bool] :                              True
-  Save File Name [str] :                         Tr_G_WT_focused_N50_P5000_Adam_1
-  Save Folder Name [str] :                       run_01  
+  Save File Name [str] :                         Tr_G_WT_normalized_focused_N50_P5000_Adam
+  Save Folder Name [str] :                       run_02  
 
 
 ################################################################################
@@ -57,14 +57,14 @@ Save State [Bool] :                              True
 Discovery, or Extraction mode [str] :            Discovery
 
 # Which dataset do we want to use?
-DataSet Name [str] :                             Tr_G_WT_focused_N50_P5000
+DataSet Name [str] :                             Tr_G_WT_normalized_focused_N50_P5000
 
 # Discovery mode specific settings.
 Number of Training Collocation Points [int] :    40000
 Number of Testing Collocation Points [int] :     20000
 
 # Extraction mode specific settings.
-Extracted PDE maximum term degree [int] :        4
+Extracted PDE maximum term degree [int] :        5
 Number of Extraction Points [int] :              20000
 
 Train on CPU or GPU [GPU, CPU] :                 GPU
@@ -79,7 +79,7 @@ Train on CPU or GPU [GPU, CPU] :                 GPU
 # Here, m = Time Derivative Order, and n = Spatial Derivative Order.
 
 PDE - Time Derivative Order [int] :              1
-PDE - Spatial Derivative Order [int] :           2
+PDE - Spatial Derivative Order [int] :           3
 
 
 
@@ -110,7 +110,7 @@ Optimizer [Adam, LBFGS, SGD] :                   Adam
 ################################################################################
 # Learning hyper-parameters
 
-Number of Epochs [int] :                         100
+Number of Epochs [int] :                         2000
 Learning Rate [float] :                          .001
 
 Epochs between testing [int] :                   10

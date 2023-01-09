@@ -257,6 +257,7 @@ def Settings_Reader() -> Settings_Container:
             Settings.Load_Optimizer_State   == True):
 
         Settings.Load_File_Name     = Read_Setting(File, "Load File Name [str] :");
+        Settings.Load_Folder_Name   = Read_Setting(File, "Load Folder Name [str] :");
 
     # Should we save the network/optimizer state to file?
     Settings.Save_To_File           = Read_Bool_Setting(File, "Save State [bool] :");

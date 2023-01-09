@@ -1,6 +1,9 @@
 import  numpy;
 import  scipy.io;
 import  matplotlib.pyplot as plt;
+import  pathlib
+import  h5py
+
 
 
 from    Settings_Reader import Settings_Reader, Settings_Container;
@@ -28,17 +31,29 @@ def Load_Dataset(
     """ This function loads the dataset and adds noise to it. We return a
     four element tuple, whose first element contains the raw dataset, and whose
     second element contains the dataset with added noise. """
+    # extension of file
+    extension = pathlib.Path(Data_Set_File_Name).suffix
+    print("file extension : ",extension)
+    if extension == ".mat":
+        # Load data file.
+        Data_Set_File_Path  = "../MATLAB/Data/" + Data_Set_File_Name;
+        Data_In             = scipy.io.loadmat(Data_Set_File_Path);
 
-    # Load data file.
-    Data_Set_File_Path  = "../MATLAB/Data/" + Data_Set_File_Name;
-    Data_In             = scipy.io.loadmat(Data_Set_File_Path);
-
+    if extension == ".hdf5":
+        # Load data file.
+        Data_Set_File_Path = "../Data/DataSets/" + Data_Set_File_Name;
+        Data_In_File = h5py.File(Data_Set_File_Path, 'r');
+        Data_In = {};
+        Data_In['t'] = Data_In_File["t"][:];
+        Data_In['x'] = Data_In_File["x"][:];
+        Data_In['usol'] = Data_In_File["u"][:];
+        Data_In_File.close();    
+    
     # Fetch spatial, temporal coordinates and the true solution. We cast these
     # to singles (32 bit fp) since that's what the rest of the code uses.
     t_points : numpy.array = Data_In['t'].reshape(-1).astype(dtype  = numpy.float32);
     x_points : numpy.array = Data_In['x'].reshape(-1).astype(dtype  = numpy.float32);
     Data_Set : numpy.array = (numpy.real(Data_In['usol'])).astype(dtype  = numpy.float32);
-
     # Add noise to true solution.
     Noisy_Data_Set : numpy.array = Data_Set + Noise_Level*(numpy.std(Data_Set)*numpy.random.randn(*Data_Set.shape));
 

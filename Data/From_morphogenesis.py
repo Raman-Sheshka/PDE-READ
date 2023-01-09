@@ -1,17 +1,20 @@
 import numpy as np;
 import pandas as pd;
 from matplotlib import pyplot as plt;
+import os
+import h5py
 
 from Create_Data_Set import Create_Data_Set;
 
 
 
 Make_Plot : bool = True;
+CURRENT_PATH = os.getcwd()
 
 def main():
     # Specify settings.
-    Data_File_Name      : str   = "Tr_G_WT_rescaled";
-    Noise_Proportion    : float = 0.5;
+    Data_File_Name      : str   = "Tr_G_WT_normalized_focused";
+    Noise_Proportion    : float = 0.1;
 
     Num_Train_Examples  : int   = 5000;
     Num_Test_Examples   : int   = 1000;
@@ -22,9 +25,11 @@ def main():
     sigma_space = 4;
     nb_x_points = 252;
     nb_t_points = 242;
-    time_born_change : bool = False;
+    time_born_change : bool = True;
     time_frame_start : int = 30;
     time_frame_end : int = 128;
+
+    normalize_signal : bool = True;
 
     # Now pass them to "From_MATLAB".
     From_Morphogenesis(    Data_File_Name      = Data_File_Name,
@@ -39,7 +44,8 @@ def main():
                            nb_t_points = nb_t_points,
                            time_born_change = time_born_change,
                            time_frame_start = time_frame_start,
-                           time_frame_end = time_frame_end);
+                           time_frame_end = time_frame_end,
+                           normalize_signal = normalize_signal);
 
 
 
@@ -55,7 +61,8 @@ def From_Morphogenesis(    Data_File_Name      : str,
                            nb_t_points         : int,
                            time_born_change    : bool,
                            time_frame_start    :int,
-                           time_frame_end      :int) -> None:
+                           time_frame_end      :int,
+                           normalize_signal    :bool) -> None:
     """ This function loads a .mat data set, and generates a sparse and noisy
     data set from it. To do this, we first read in a .mat data set. We assume
     this file  contains three fields: t, x, and usol. t and x are ordered lists
@@ -126,15 +133,21 @@ def From_Morphogenesis(    Data_File_Name      : str,
                                         nb_x_points,
                                         nb_t_points,
                                         average_window_characteristics);
+    if normalize_signal:
+        u_new_min = u_new.min().min();
+        u_new_max = u_new.max().max();
+        u_new_normalized = (u_new - u_new_min)/(u_new_max - u_new_min)*2-1;
+        u_new = u_new_normalized;
     t,x = np.meshgrid(t_new,x_new);
     print('Shape of grid u_data resized:',  u_new.shape);
-    data = {};
-    data['t'] = t;
-    print('Shape of grid t:', data['t'].shape);
-    data['x'] = x;
-    print('Shape of grid x:', data['x'].shape);
-    data['u'] = u_new;
-    print('Shape of grid u:', data['u'].shape);
+    data_in = {};
+    data_in['t'] = t;
+    print('Shape of grid t:', data_in['t'].shape);
+    data_in['x'] = x;
+    print('Shape of grid x:', data_in['x'].shape);
+    data_in['u'] = u_new;
+    print('Shape of grid u:', data_in['u'].shape);
+
     # Fetch spatial, temporal coordinates and the true solution. We cast these
     # to singles (32 bit fp) since that's what PDE-REAd uses.
     t_points    =  t_new.reshape(-1).astype(dtype = np.float32);
@@ -177,6 +190,19 @@ def From_Morphogenesis(    Data_File_Name      : str,
         plt.ylabel("x");
         plt.show();
 
+        Data_min : float = np.min(Data_Set);
+        Data_max : float = np.max(Data_Set);
+        plt.contourf(       t_coords_matrix,
+                            x_coords_matrix,
+                            Data_Set,
+                            levels      = np.linspace(Data_min, Data_max, 500),
+                            cmap        = plt.cm.jet);
+
+        plt.colorbar();
+        plt.xlabel("t");
+        plt.ylabel("x");
+        plt.show();
+
     # Now, stitch successive the rows of the coordinate matrices together
     # to make a 1D array. We interpert the result as a 1 column matrix.
     t_coords_1D : np.ndarray = t_coords_matrix.flatten().reshape(-1, 1);
@@ -211,6 +237,19 @@ def From_Morphogenesis(    Data_File_Name      : str,
                         Test_Inputs     = Test_Inputs,
                         Test_Targets    = Test_Targets,
                         Input_Bounds    = Input_Bounds);
+
+    save_rescaled_data_file_name = DataSet_Name + ".hdf5";
+    if os.path.isfile(os.path.join(CURRENT_PATH,"DataSets",save_rescaled_data_file_name)):
+        os.remove(os.path.join(CURRENT_PATH,"DataSets",save_rescaled_data_file_name));
+    os.chdir(os.path.join(CURRENT_PATH,"DataSets"));                                   
+    outfile = h5py.File(save_rescaled_data_file_name , 'w');
+    outfile.close();
+    outfile =  h5py.File(save_rescaled_data_file_name , 'w');
+    outfile.create_dataset('t', data = t_new);
+    outfile.create_dataset('x', data = x_new);
+    outfile.create_dataset('u', data = u_new);
+    outfile.close();
+    os.chdir(CURRENT_PATH);                    
 
 def signal_rebase(matrix : pd.DataFrame(), x_ref : np.array(()), t_ref : np.array(()), nb_x : int, nb_t : int, average_window_characteristics):
     average_window = average_window_characteristics[0];
