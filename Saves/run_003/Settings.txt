@@ -1,0 +1,116 @@
+# This file controls the program settings. The file consists of blank, comment,
+# and setting lines. Each comment line begins with '#'. Each setting line uses
+# the following format:
+#         <Setting Name> [<data type>] : <value>
+# <value>'s data type must match <data type>. You can place any number of spaces
+# between the colon and <value> (the spacing after the colon doesn't matter, so
+# long as the setting is all on one line). Nothing can appear after <value> on a
+# setting line. You CAN NOT change the order of the setting lines.
+#
+# The reader will ignore all blank and comment lines. Thus, you can add them as
+# you see fit, as they will not break the reader.
+
+
+################################################################################
+# Save, Load Settings
+# The "Floating Point Precision" setting does not need to match that of the
+# saved state. Thus, for example, you can load a save that used singles into a
+# network that uses doubles.
+#
+# The Load/Save File Name, and the Data File Name can not contain spaces. The
+# Data File Name should include a file extension.
+#
+# The code will NOT load the Optimizer if in Extraction mode. In this case, the
+# Reader ignores the load optimizer setting.
+
+Load Sol Network State [bool] :                  True
+Load PDE Network State [bool] :                  True
+Load Optimizer State [bool] :                    False
+  Load File Name [str] :                         Tr_G_WT_normalized_00_N10_P5000_Adam
+  Load Folder Name [str] :                       run_003
+
+Save State [Bool] :                              True
+  Save File Name [str] :                         Tr_G_WT_normalized_00_N10_P5000_LBFGS
+  Save Folder Name [str] :                       run_003  
+
+
+################################################################################
+# Mode
+# The "Discovery, or Extraction mode" setting controls what the code
+# does. The allowed values for this setting are "Discovery" or
+# "Extraction". Actually, the reader will interpret any word that begins with
+# "d" or "D" as "Discovery" and any word that begins with "e" or "E" as
+# "Extraction".
+#
+# In Discovery mode, the code trains both the Solution and PDE networks. The
+# loss consists of data and collocation losses. In this mode, the reader will
+# ignore the Extraction settings (so you can too!)
+#
+# In Extraction mode, the code trains neither network. Instead, it attempts to
+# extract a PDE from the PDE network (which means you should load a trained
+# PDE network). In this mode, you must set the "Extracted PDE term degree" and
+# "Number of Extraction Points" settings. The former controls the maximum degree
+# of the terms that we try to extract (the term du_dx has degree one, u*du_dx
+# has degree 2, u^2 (du_dx)^3 d^2u_dx^2 has order 6, etc.). The latter controls
+# the number of points (in the PDE domain) at which we attempt to fit the PDE.
+
+Discovery, or Extraction mode [str] :            Discovery
+
+# Which dataset do we want to use?
+DataSet Name [str] :                             Tr_G_WT_normalized_00_N10_P5000
+
+# Discovery mode specific settings.
+Number of Training Collocation Points [int] :    40000
+Number of Testing Collocation Points [int] :     20000
+
+# Extraction mode specific settings.
+Extracted PDE maximum term degree [int] :        3
+Number of Extraction Points [int] :              20000
+
+Train on CPU or GPU [GPU, CPU] :                 GPU
+
+
+
+################################################################################
+# PDE settings.
+# These settings control the nature of the PDE we try to uncover. Our goal is
+# to find a PDE of the following form:
+#         D_t^m U = N(U, D_x U, D_x^2 U, ... , D_x^n U)
+# Here, m = Time Derivative Order, and n = Spatial Derivative Order.
+
+PDE - Time Derivative Order [int] :              1
+PDE - Spatial Derivative Order [int] :           3
+
+
+
+################################################################################
+# Network Settings
+# If you Load the Optimizer state, the Optimizer type must match that of the
+# saved optimizer. If you want to switch Optimizers, don't load the Optimizer.
+#
+# If you plan to load the state of either network (set above), then the network
+# Architecture settings below must match those of the saved network. (same
+# number of layers and neurons per layer).
+#
+# Each Network's Activation function must be in {Rational, Tanh, Sine}
+
+Sol Network - Number of Hidden Layers [int] :    5
+Sol Network - Neurons per Hidden Layer [int] :   50
+Sol Network - Activation Function [str] :        Rat
+
+PDE Network - Normalize Inputs [bool] :          False
+PDE Network - Number of Hidden Layers [int] :    2
+PDE Network - Neurons per Hidden Layer [int] :   100
+PDE Network - Activation Function [str] :        Rat
+
+Optimizer [Adam, LBFGS, SGD] :                   LBFGS
+
+
+
+################################################################################
+# Learning hyper-parameters
+
+Number of Epochs [int] :                         100
+Learning Rate [float] :                          .01
+
+Epochs between testing [int] :                   10
